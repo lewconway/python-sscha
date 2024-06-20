@@ -1,3 +1,5 @@
+## LJC: A fork of SSCHA with some QOL tweaks
+
 # SSCHA
 
 The stochastic self-consistent harmonic approximation (SSCHA) is a full computational python package that simulates thermodynamic and phononic properties of materials accounting for anharmonicity at a nonperturbative level, fully including quantum and thermal fluctuations.
