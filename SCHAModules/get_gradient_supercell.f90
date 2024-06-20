@@ -16,7 +16,7 @@
 ! performed. In this way the gradient is automatically preconditioned.
   
 subroutine get_gradient_supercell( n_random, natsc, n_modes, ntyp_sc, rho, u_disp, eforces, &
-     wr_sc, epols_sc, trans, T, mass, ityp_sc, log_err, grad, grad_err, preconditioned)
+     wr_sc, epols_sc, trans, T, mass, ityp_sc, log_err, grad, grad_err, preconditioned, verbose)
 
 
   use stochastic
@@ -72,6 +72,8 @@ subroutine get_gradient_supercell( n_random, natsc, n_modes, ntyp_sc, rho, u_dis
   ! A flag used to chose the kind of average to be performed 
 
   double precision, dimension(3*natsc, 3*natsc), intent(out) :: grad, grad_err
+
+  logical, intent(in) :: verbose
   !
   ! The output gradient and its error in real space.
   ! Note that it needs to be symmetrized.
@@ -181,7 +183,7 @@ subroutine get_gradient_supercell( n_random, natsc, n_modes, ntyp_sc, rho, u_dis
   ! end do
   call cpu_time(t2)
   
-  print *, " Time to compute <uf> in real space: ", t2 - t1
+  !print *, " Time to compute <uf> in real space: ", t2 - t1
   call flush()
 
   ! Compute the upsilon matrix in the supercell
@@ -212,7 +214,7 @@ subroutine get_gradient_supercell( n_random, natsc, n_modes, ntyp_sc, rho, u_dis
   call dgemm("N", "N", 3*natsc, 3*natsc, 3*natsc, 1.0d0, ups_mat, 3*natsc,  uf_mat, 3*natsc, 0.0d0, grad, 3*natsc)
   call dgemm("N", "N", 3*natsc, 3*natsc, 3*natsc, 1.0d0, ups_mat, 3*natsc,  err_uf_mat, 3*natsc, 0.0d0, grad_err, 3*natsc)
   call cpu_time(t2)
-  print *, " get_gradient_supercell : Elapsed time to perform the multiplication", t2 - t1
+  if (verbose) print *, " get_gradient_supercell : Elapsed time to perform the multiplication", t2 - t1
   call flush()
   ! Symmetrize the gradient
   ! In fact the product of symmetric matrices is not symmetric!!!!
@@ -232,8 +234,10 @@ subroutine get_gradient_supercell( n_random, natsc, n_modes, ntyp_sc, rho, u_dis
   
   ! Perform the inverse preconditioning if required:
   if (.not. precond) then
-     print *, "Applying the dPsi/dPhi tensor to the gradient [This may require some time for system with more than 50 atoms]"
-     print *, "If it takes too long, turn on preconditioning."
+     if (verbose) then
+        print *, "Applying the dPsi/dPhi tensor to the gradient [This may require some time for system with more than 50 atoms]"
+        print *, "If it takes too long, turn on preconditioning."
+     end if
      call flush()
      call multiply_lambda_tensor(n_modes, natsc, ntyp_sc, wr_sc, epols_sc, trans, &
           mass, ityp_sc, T, grad, tmp, .false.)
@@ -260,7 +264,7 @@ end subroutine get_gradient_supercell
 !
 
 subroutine get_gradient_supercell_new( n_random, natsc, n_modes, ntyp_sc, rho, u_disp, eforces, &
-   wr_sc, epols_sc, trans, T, mass, ityp_sc, log_err, grad, grad_err)
+   wr_sc, epols_sc, trans, T, mass, ityp_sc, log_err, grad, grad_err, verbose)
 
 
 use stochastic
@@ -321,6 +325,7 @@ double precision, dimension(3*natsc, 3*natsc), intent(out) :: grad, grad_err
 ! Note that it needs to be symmetrized.
 !
 
+logical, intent(in) :: verbose
 
 ! ---------------------------------- END OF INPUT DEFINITION ------------------------------------
 integer i, j, alpha, beta, ical, jcal, i_r
@@ -492,8 +497,10 @@ end do
 
 ! Perform the inverse preconditioning if required:
 if (.not. precond) then
-   print *, "Applying the dPsi/dPhi tensor to the gradient [This may require some time for system with more than 50 atoms]"
-   print *, "If it takes too long, turn on preconditioning."
+   if (verbose) then
+      print *, "Applying the dPsi/dPhi tensor to the gradient [This may require some time for system with more than 50 atoms]"
+      print *, "If it takes too long, turn on preconditioning."
+   end if 
    call flush()
    call multiply_lambda_tensor(n_modes, natsc, ntyp_sc, wr_sc, epols_sc, trans, &
         mass, ityp_sc, T, grad, tmp, .false.)

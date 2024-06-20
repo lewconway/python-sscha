@@ -29,7 +29,7 @@ These files are generated only by python-sscha >= 1.2.
 
 
 def main():
-    print(DESCRIPTION)
+#    print(DESCRIPTION)
 
     if len(sys.argv) < 2:
         ERROR_MSG = '''
@@ -39,7 +39,7 @@ Exit failure!
         print(ERROR_MSG)
         raise ValueError(ERROR_MSG)
     
-    plt.rcParams["font.family"] = "Liberation Serif"
+    #plt.rcParams["font.family"] = "Liberation Serif"
     LBL_FS = 12
     DPI = 120
     TITLE_FS = 15
@@ -77,7 +77,7 @@ Exit failure!
         exit()
 
     if plot_minim:
-        print("Preparing the minimization data...") 
+        #print("Preparing the minimization data...") 
         minim_data = np.concatenate([np.loadtxt(f) for f in minim_files])
 
         # Insert the x axis in the plotting data
@@ -112,12 +112,13 @@ Exit failure!
         axarr[1,0].set_ylabel("Effective sample size", fontsize = LBL_FS)
         axarr[1,0].set_xlabel("Good minimization steps", fontsize = LBL_FS)
         fig_data.tight_layout()
+        plt.savefig('minim.png')
     
 
 
 
     if plot_frequencies:
-        print("Plotting the frequencies")
+        #print("Plotting the frequencies")
 
         # Load all the data
         freqs_data = np.concatenate([np.loadtxt(f) for f in freqs_files])
@@ -134,8 +135,9 @@ Exit failure!
         ax.set_ylabel("Frequency [cm-1]", fontsize = LBL_FS)
         ax.set_title("Frequcency evolution", fontsize = TITLE_FS)
         fig_freqs.tight_layout()
+        plt.savefig('freq.png')
 
-    plt.show()
+    #plt.show()
     
 if __name__ == "__main__":
     main()

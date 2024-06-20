@@ -309,7 +309,7 @@ class SSCHA_Minimizer(object):
         if self.dyn is None:
             self.dyn = self.ensemble.current_dyn.Copy()
 
-    def minimization_step(self, custom_function_gradient = None, timer=None):
+    def minimization_step(self, custom_function_gradient = None, timer=None, verbose=False):
         """
         Perform the single minimization step.
         This modify the self.dyn matrix and updates the ensemble
@@ -322,7 +322,8 @@ class SSCHA_Minimizer(object):
                 It takes as input the two gradient (the dynamical matrix one and the structure one), and
                 modifies them (or does some I/O on it).
         """
-        print("Minimization step, force computed:", len(self.ensemble.force_computed))
+        if verbose:
+            print("Minimization step, force computed:", len(self.ensemble.force_computed))
 
         # Setup the symmetries
         t1 = time.time()
@@ -353,14 +354,14 @@ class SSCHA_Minimizer(object):
                         dyn_grad, err = self.ensemble.get_fourier_gradient()
                 else:
                     if timer is not None:
-                        dyn_grad, err = timer.execute_timed_function(self.ensemble.get_preconditioned_gradient_parallel, True, True, preconditioned=1)
+                        dyn_grad, err = timer.execute_timed_function(self.ensemble.get_preconditioned_gradient_parallel, True, True, preconditioned=1, verbose=verbose)
                     else:
-                        dyn_grad, err = self.ensemble.get_preconditioned_gradient_parallel(True, True, preconditioned=1)
+                        dyn_grad, err = self.ensemble.get_preconditioned_gradient_parallel(True, True, preconditioned=1, verbose=verbose)
             else:
                 if timer is not None:
-                    dyn_grad, err = timer.execute_timed_function(self.ensemble.get_preconditioned_gradient_parallel, True, True, preconditioned=0)
+                    dyn_grad, err = timer.execute_timed_function(self.ensemble.get_preconditioned_gradient_parallel, True, True, preconditioned=0, verbose=verbose)
                 else:
-                    dyn_grad, err = self.ensemble.get_preconditioned_gradient_parallel(True, True, preconditioned=0)
+                    dyn_grad, err = self.ensemble.get_preconditioned_gradient_parallel(True, True, preconditioned=0, verbose=verbose)
         else:
             dyn_grad = np.zeros( (len(self.dyn.q_tot), 3 * self.dyn.structure.N_atoms, 3 * self.dyn.structure.N_atoms), dtype = np.complex128)
             err = np.zeros_like(dyn_grad)
@@ -1164,7 +1165,7 @@ Maybe data_dir is missing from your input?"""
             else:
                 grad, err_grad = self.ensemble.get_fourier_gradient()
         else:
-            grad = self.ensemble.get_preconditioned_gradient(True)
+            grad = self.ensemble.get_preconditioned_gradient(True, verbose=verbosity)
         if verbosity:
             print ("After gradient.")
         self.prev_grad = grad
@@ -1295,10 +1296,10 @@ WARNING, the preconditioning is activated together with a root representation.
 
             # Perform the minimization step
             if timer is not None:
-                timer.execute_timed_function(self.minimization_step, custom_function_gradient)
+                timer.execute_timed_function(self.minimization_step, custom_function_gradient, verbose=verbose)
                 im_freqs = timer.execute_timed_function(self.check_imaginary_frequencies)
             else:
-                self.minimization_step(custom_function_gradient)
+                self.minimization_step(custom_function_gradient, verbose=verbose)
                 im_freqs = self.check_imaginary_frequencies()
 
 

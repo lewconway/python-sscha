@@ -532,9 +532,9 @@ class IOInfo:
         if root_name is None:
             raise IOError("Error, a filename must be specified to save the data.")
 
-        print("ROOT  NAME:", root_name)
-        print("SAVE  NAME:", self.__save_fname)
-        print("FNAME NAME:", fname)
+        #print("ROOT  NAME:", root_name)
+        #print("SAVE  NAME:", self.__save_fname)
+        #print("FNAME NAME:", fname)
         freq_name = root_name + '.freqs'
         data_name = root_name + '.dat'
 

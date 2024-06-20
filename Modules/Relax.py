@@ -296,7 +296,7 @@ class SSCHA(object):
 
     def relax(self, restart_from_ens = False, get_stress = False,
               ensemble_loc = None, start_pop = None, sobol = False,
-               sobol_scramble = False, sobol_scatter = 0.0):
+               sobol_scramble = False, sobol_scatter = 0.0, verbose=False):
         """
         COSTANT VOLUME RELAX
         ====================
@@ -376,7 +376,7 @@ Error, the specified location to save the ensemble:
                     self.minim.ensemble.compute_ensemble(**self.aiida_inputs)
                 else:
                     self.minim.ensemble.compute_ensemble(
-                        self.calc, get_stress, cluster = self.cluster)
+                        self.calc, get_stress, cluster = self.cluster, verbose=verbose)
                 #self.minim.ensemble.get_energy_forces(self.calc, get_stress)
 
                 if ensemble_loc is not None and self.save_ensemble:
@@ -387,7 +387,7 @@ Error, the specified location to save the ensemble:
 
             self.minim.run(custom_function_pre = self.__cfpre__,
                            custom_function_post = self.__cfpost__,
-                           custom_function_gradient = self.__cfg__)
+                           custom_function_gradient = self.__cfg__, verbose=verbose)
 
 
             self.minim.finalize()
