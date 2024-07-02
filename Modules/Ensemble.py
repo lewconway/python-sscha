@@ -80,33 +80,36 @@ __A_TO_BOHR__ = 1.889725989
 
 __JULIA_EXT__ = False
 __JULIA_ERROR__ = ""
-try:
-    import julia
-    import julia.Main
-    julia.Main.include(os.path.join(os.path.dirname(__file__),
-                                    "fourier_gradient.jl"))
-    __JULIA_EXT__ = True
-except:
+if 'SSCHA_NO_JULIA' in os.environ.keys() and os.environ['SSCHA_NO_JULIA']:
+    pass
+else:
     try:
         import julia
+        import julia.Main
+        julia.Main.include(os.path.join(os.path.dirname(__file__),
+                                        "fourier_gradient.jl"))
+        __JULIA_EXT__ = True
+    except:
         try:
-            from julia.api import Julia
-            jl = Julia(compiled_modules=False)
-            import julia.Main
-            julia.Main.include(os.path.join(os.path.dirname(__file__),
-                                            "fourier_gradient.jl"))
-            __JULIA_EXT__ = True
-        except:
-            # Install the required modules
-            julia.install()
+            import julia
             try:
+                from julia.api import Julia
+                jl = Julia(compiled_modules=False)
+                import julia.Main
                 julia.Main.include(os.path.join(os.path.dirname(__file__),
                                                 "fourier_gradient.jl"))
                 __JULIA_EXT__ = True
-            except Exception as e:
-                warnings.warn("Julia extension not available.\nError: {}".format(e))
-    except Exception as e:
-        warnings.warn("Julia extension not available.\nError: {}".format(e))
+            except:
+                # Install the required modules
+                julia.install()
+                try:
+                    julia.Main.include(os.path.join(os.path.dirname(__file__),
+                                                    "fourier_gradient.jl"))
+                    __JULIA_EXT__ = True
+                except Exception as e:
+                    warnings.warn("Julia extension not available.\nError: {}".format(e))
+        except Exception as e:
+            warnings.warn("Julia extension not available.\nError: {}".format(e))
 
 
 try:
@@ -2771,8 +2774,8 @@ Error while loading the julia module.
             if timer:
                 grad, grad_err = timer.execute_timed_function(SCHAModules.get_gradient_supercell_new,
                                                               self.rho, u_disp, eforces, w, pols, trans,
-                                                              self.current_T, mass, ityp, log_err, self.N,
-                                                              nat, 3*nat, len(mass), verbose,
+                                                              self.current_T, mass, ityp, log_err, verbose, self.N,
+                                                              nat, 3*nat, len(mass),
                                                               override_name="get_gradient_supercell_new")
             else:
                 grad, grad_err = SCHAModules.get_gradient_supercell_new(self.rho, u_disp, eforces, w, pols, trans,
@@ -3373,6 +3376,7 @@ Error while loading the julia module.
     #     t3 = time.time()
     #     print("Time elapsed to compute v3:", t3-t1, "s")
     #     return v3
+
 
     def get_odd_realspace(self):
         """
@@ -4024,6 +4028,16 @@ Error while loading the julia module.
                 Usefull if the calculation crashed for some reason.
 
         """
+
+        if 'spawnfile' in ase_calculator.parameters.keys():
+            atoms = [a.get_ase_atoms() for a in self.structures]
+            jax_energies, jax_forces = ase_calculator.batch_calculate(atoms)
+            jax_energies = np.array(jax_energies)/Rydberg
+            jax_forces = np.squeeze(jax_forces)/Rydberg
+            self.energies = jax_energies
+            self.forces = jax_forces
+            self.force_computed[:] = True
+            return
 
         # Setup the calculator for each structure
         parallel = False
