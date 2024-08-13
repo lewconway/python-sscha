@@ -4031,12 +4031,15 @@ Error while loading the julia module.
 
         if 'spawnfile' in ase_calculator.parameters.keys():
             atoms = [a.get_ase_atoms() for a in self.structures]
-            jax_energies, jax_forces = ase_calculator.batch_calculate(atoms)
+            jax_energies, jax_forces, jax_stresses = ase_calculator.batch_calculate(atoms)
             jax_energies = np.array(jax_energies)/Rydberg
             jax_forces = np.squeeze(jax_forces)/Rydberg
             self.energies = jax_energies
             self.forces = jax_forces
             self.force_computed[:] = True
+            self.stresses = jax_stresses
+            self.has_stress = True
+            self.stress_computed[:] = True
             return
 
         # Setup the calculator for each structure
