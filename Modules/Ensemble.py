@@ -4034,7 +4034,7 @@ Error while loading the julia module.
             jax_energies, jax_forces, jax_stresses = ase_calculator.batch_calculate(atoms)
             jax_energies = np.array(jax_energies)/Rydberg
             jax_forces = np.squeeze(jax_forces)/Rydberg
-            jax_stresses = np.squeeze(jax_stresses) * Bohr**3 / Rydberg
+            jax_stresses = -np.squeeze(jax_stresses) * Bohr**3 / Rydberg
             self.energies = jax_energies
             self.forces = jax_forces
             self.force_computed[:] = True
